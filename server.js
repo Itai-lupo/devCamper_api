@@ -9,8 +9,11 @@ const bootcamps = require('./routes/bootcamps');
 dotenv.config({path: './config/config.env'});
 connectDB();
 
-const app = express();
 const PORT = process.env.PORT || 5000;
+
+const app = express();
+
+app.use(express.json());
 
 if(process.env.NODE_ENV === 'development') app.use(logger);
 
