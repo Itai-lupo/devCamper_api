@@ -2,9 +2,14 @@ function errorHandler(err, req, res, next)
 {
     console.log(err.stack);
 
-    res.status(500).json({
+    if(err.code === 11000 || err.name === "ValidationError")
+    {
+        err.statusCode = 400
+    }
+
+    res.status(err.statusCode || 500).json({
         success: false,
-        err: err.message
+        err: err.message || "server error"
     })
 }
 
