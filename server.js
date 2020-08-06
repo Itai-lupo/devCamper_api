@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
-const logger = require("./middleware/logger")
+const logger = require("./middleware/logger");
+const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
 
 //route files
@@ -18,7 +19,7 @@ app.use(express.json());
 if(process.env.NODE_ENV === 'development') app.use(logger);
 
 app.use('/api/v1/bootcamps', bootcamps);
-
+app.use(errorHandler);
 app.get('/', (req, res) => {
     res.send('Hello from express');
 })

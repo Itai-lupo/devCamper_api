@@ -8,14 +8,10 @@ exports.getBootcamps = async (req, res, next) =>
     try{
         const bootcamps = await Bootcamp.find();
 
-        res.json({
-            success: true,
-            data: bootcamps
-        })
+        returnSuccessRespondToTheClient(200, bootcamps);
     }
     catch (e){
-        res.status(400).json({success: false, msg: e.message});
-
+        next(err);
     }
 
 }
@@ -27,25 +23,23 @@ exports.getBootcamps = async (req, res, next) =>
 exports.getBootcamp = async (req, res, next) => 
 {
     try{
-        const bootcamp = await Bootcamp.findById(req.params.id);
+        const bootcamp = await findBootcampInTheDB(req.params.id);
 
-        if(!bootcamp)
-        {
-            return res.status(404).json({success: false});
-        }
-
-
-        res.json({
-            success: true,
-            data: bootcamp
-        })
+        returnSuccessRespondToTheClient(201, bootcamp);
     }
     catch (e){ 
-        res.status(400).json({success: false, msg: e.message});
-
+        next(e);
     }
 }
 
+async function findBootcampInTheDB(id)
+{
+    const bootcamp = await Bootcamp.findById(id);
+
+    checkIfBootcampFoundIfNotThrowErr(bootcamp);
+
+    return bootcamp;
+}  
 
 //@desc     Create new bootcamp
 //@route    POST /api/v1/bootcamps/
@@ -54,21 +48,23 @@ exports.createBootcamp = async (req, res, next) =>
 {
     try
     {
-        const bootcamp = await Bootcamp.create(req.body);
+        const bootcamp = await createBootcampInTheDB(req.body);
 
-        res.status(201).json({
-            success: true,
-            data: bootcamp
-        });
+        returnSuccessRespondToTheClient(201, bootcamp);
     }
     catch (e)
     {
-        res.status(400).json({
-            success: false,
-            msg: e.message
-        });
+        next(e);
     }
 }
+
+
+async function createBootcampInTheDB(bootcampToCreate)
+{
+    const bootcamp = await Bootcamp.create(bootcampToCreate);
+
+    return bootcamp;
+}  
 
 //@desc     update new bootcamp
 //@route    PUT /api/v1/bootcamps/:id
@@ -77,29 +73,28 @@ exports.updateBootcamp = async (req, res, next) =>
 {
     try
     {
-        const bootcamp = await Bootcamp.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
+        const bootcamp = await updateBootcampInTheDB(req.params.id, req.body)
 
-        if(!bootcamp)
-        {
-            return res.status(404).json({success: false});
-        }
-
-        res.status(200).json({
-            success: true,
-            data: bootcamp
-        });
+        returnSuccessRespondToTheClient(200, bootcamp);
     }
     catch (e)
     {
-        res.status(400).json({
-            success: false,
-            msg: e.message
-        });
+        next(e);
     }
 }
+
+
+async function updateBootcampInTheDB(id, update)
+{
+    const bootcamp = await Bootcamp.findByIdAndUpdate(id, update, {
+        new: true,
+        runValidators: true
+    });
+
+    checkIfBootcampFoundIfNotThrowErr(bootcamp);
+
+    return bootcamp;
+}  
 
 //@desc     delete new bootcamp
 //@route    delete /api/v1/bootcamps/:id
@@ -108,24 +103,38 @@ exports.deleteBootcamp = async (req, res, next) =>
 {
     try
     {
-        const bootcamp = await Bootcamp.findByIdAndDelete(req.params.id);
+        await deleteBootcampInTheDB(req.params.id);
 
-        if(!bootcamp)
-        {
-            return res.status(404).json({success: false});
-        }
-
-        res.status(200).json({
-            success: true,
-            data: {}
-        });
+        returnSuccessRespondToTheClient(200, {});
     }
     catch (e)
     {
-        res.status(400).json({
-            success: false,
-            msg: e.message
-        });
+        next(e);
     }
+}
+
+async function deleteBootcampInTheDB(id)
+{
+    const bootcamp = await Bootcamp.findByIdAndDelete(id);
+
+    checkIfBootcampFoundIfNotThrowErr(bootcamp);
+}  
+
+
+
+function checkIfBootcampFoundIfNotThrowErr(bootcamp)
+{
+    if(!bootcamp)
+    {
+        throw new Error("bootcamp wan't found");
+    }
+}
+
+function returnSuccessRespondToTheClient(status, data)
+{
+    res.status(status).json({
+        success: true,
+        data: data
+    });
 }
 
