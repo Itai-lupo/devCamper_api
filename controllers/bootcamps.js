@@ -8,10 +8,10 @@ exports.getBootcamps = async (req, res, next) =>
     try{
         const bootcamps = await Bootcamp.find();
 
-        returnSuccessRespondToTheClient(200, bootcamps);
+        returnSuccessRespondToTheClient(res, 200, bootcamps);
     }
     catch (e){
-        next(err);
+        next(e);
     }
 
 }
@@ -25,7 +25,7 @@ exports.getBootcamp = async (req, res, next) =>
     try{
         const bootcamp = await findBootcampInTheDB(req.params.id);
 
-        returnSuccessRespondToTheClient(201, bootcamp);
+        returnSuccessRespondToTheClient(res, 200, bootcamp);
     }
     catch (e){ 
         next(e);
@@ -50,7 +50,7 @@ exports.createBootcamp = async (req, res, next) =>
     {
         const bootcamp = await createBootcampInTheDB(req.body);
 
-        returnSuccessRespondToTheClient(201, bootcamp);
+        returnSuccessRespondToTheClient(res, 201, bootcamp);
     }
     catch (e)
     {
@@ -75,7 +75,7 @@ exports.updateBootcamp = async (req, res, next) =>
     {
         const bootcamp = await updateBootcampInTheDB(req.params.id, req.body)
 
-        returnSuccessRespondToTheClient(200, bootcamp);
+        returnSuccessRespondToTheClient(res, 200, bootcamp);
     }
     catch (e)
     {
@@ -105,7 +105,7 @@ exports.deleteBootcamp = async (req, res, next) =>
     {
         await deleteBootcampInTheDB(req.params.id);
 
-        returnSuccessRespondToTheClient(200, {});
+        returnSuccessRespondToTheClient(res, 200, {});
     }
     catch (e)
     {
@@ -130,7 +130,7 @@ function checkIfBootcampFoundIfNotThrowErr(bootcamp)
     }
 }
 
-function returnSuccessRespondToTheClient(status, data)
+function returnSuccessRespondToTheClient(res, status, data)
 {
     res.status(status).json({
         success: true,
