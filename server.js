@@ -1,29 +1,15 @@
 const dotenv = require("./utils/dotenvInit");
 const express = require("express");
-const logger = require("./middleware/logger");
-const errorHandler = require("./middleware/error");
+const initMiddleware = require("./middleware/initMiddleware");
 const connectDB = require("./config/db");
 
-//route files
-const bootcamps = require('./routes/bootcamps');
+
 
 const PORT = process.env.PORT || 5000;
 
 const app = express();
-
 connectDB();
-
-
-app.use(express.json());
-
-if(process.env.NODE_ENV === 'development') app.use(logger);
-
-
-app.use('/api/v1/bootcamps', bootcamps);
-app.use(errorHandler);
-app.get('/', (req, res) => {
-    res.send('Hello from express');
-})
+initMiddleware(app);
 
 
 const server = app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
