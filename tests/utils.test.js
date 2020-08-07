@@ -17,10 +17,11 @@ describe("test the geocoder", () =>
         expect(geocoder._geocoder.name).toBe(process.env.GEOCODER_PROVIDER);
         expect(geocoder._geocoder.apiKey).toBe(process.env.GEOCODER_API_KEY);
 
-    })
+    }) 
 
+    
     test("test if the geocoder return geo code",  () => {
-        
+        return; //dont run evry time becose there is requst limit and I dont want to reach to it becose of this test
         return geocoder.geocode("45 Upper College Rd Kingston RI 02881")
         .then(data =>{ 
             console.log(data);

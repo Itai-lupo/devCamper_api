@@ -5,7 +5,8 @@ const
     getBootcamps,
     createBootcamp, 
     updateBootcamp, 
-    deleteBootcamp
+    deleteBootcamp,
+    getBootcampWithInRadius
 } = require("../controllers/bootcamps");
 
 const connectDB = require("../config/db");
@@ -96,6 +97,33 @@ describe("check the bootcamp controller", () => {
         
         return expect(bootcampCRUDcheck(req, res, id)).toBeTruthy();
     });
+
+    test("find all bootcamps on earth using within radios", () => {
+        const res = {
+
+            status: function(status){
+            if(status == 200) return this;
+                else throw new Error("there is error");
+            },
+
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.data.length).toBe(4);
+            }
+        }
+
+        const req = { 
+            params:
+            {
+                zipcode: "02215-1405",
+                distance: 6371
+            }
+
+        };
+
+        return getBootcampWithInRadius(req, res);
+    })
 });
 
 async function bootcampCRUDcheck(req, res, id)
