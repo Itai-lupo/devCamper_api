@@ -1,8 +1,5 @@
+const dotenv = require("./utils/dotenvInit");
 const express = require("express");
-const dotenv = require("dotenv");
-
-dotenv.config({path: './config/config.env'});
-
 const logger = require("./middleware/logger");
 const errorHandler = require("./middleware/error");
 const connectDB = require("./config/db");
@@ -10,15 +7,17 @@ const connectDB = require("./config/db");
 //route files
 const bootcamps = require('./routes/bootcamps');
 
-connectDB();
-
 const PORT = process.env.PORT || 5000;
 
 const app = express();
 
+connectDB();
+
+
 app.use(express.json());
 
 if(process.env.NODE_ENV === 'development') app.use(logger);
+
 
 app.use('/api/v1/bootcamps', bootcamps);
 app.use(errorHandler);

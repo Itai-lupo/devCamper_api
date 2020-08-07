@@ -90,7 +90,7 @@ async function deleteBootcampInTheDB(id)
     checkIfBootcampFoundIfNotThrowErr(bootcamp, id);
 }  
 
-function checkIfBootcampFoundIfNotThrowErr(bootcamp,id)
+function checkIfBootcampFoundIfNotThrowErr(bootcamp, id)
 {
     if(!bootcamp)
     {
