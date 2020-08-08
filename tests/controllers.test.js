@@ -36,7 +36,7 @@ describe("check the bootcamp controller", () => {
                 expect(obj.data).toBeTruthy();
             }
         }
-        return getBootcamps(null, res);
+        return getBootcamps({}, res);
         
     });
 
@@ -123,7 +123,66 @@ describe("check the bootcamp controller", () => {
         };
 
         return getBootcampWithInRadius(req, res);
-    })
+    });
+
+    test("find all bootcamps with avrageCost less then or equal 10000", () =>{
+        const res = {
+            status: function(status){
+            if(status == 200) return this;
+            else throw new error("there is error");
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.data.every(v => v.averageCost <= 10000)).toBe(true);
+            }
+        }
+
+        const req = {query: {averageCost: {lte: 10000}}}
+
+        return getBootcamps(req, res);
+    });
+
+    test("find all bootcamps with avrageCost more then 10000 and housing", () =>{
+        const res = {
+            status: function(status){
+            if(status == 200) return this;
+            else throw new error("there is error");
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.data.every(v => v.averageCost > 10000 && v.housing)).toBe(true);
+            }
+        }
+
+        const req = {query: {averageCost: {gt: 10000}, housing: true}};
+
+        return getBootcamps(req, res);
+    });
+
+    test("find all bootcamps and show only the names", () =>{
+        const res = {
+            status: function(status){
+            if(status == 200) return this;
+            else throw new error("there is error");
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.data.every(v => 
+                   {
+                        return Object.keys(v.toObject()).length == 2 
+                    }))
+                    .toBe(true);
+            }
+        }  
+
+        const req = {query: {select: "name"}};
+
+        return getBootcamps(req, res);
+    });
+
 });
 
 async function bootcampCRUDcheck(req, res, id)

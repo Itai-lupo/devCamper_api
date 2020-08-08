@@ -8,11 +8,51 @@ const asyncHandler = require("../middleware/async");
 //@access   public
 exports.getBootcamps = asyncHandler(async (req, res, next) => 
 {
-    const bootcamps = await Bootcamp.find();
+    let query = findBootCampsInTheDB({ ...req.query });
+    const select = selectFields(req.query)
+    
+    query = query.select(select);
+    const bootcamps = await query;
 
     returnSuccessRespondToTheClient(res, 200, bootcamps);
 });
 
+function selectFields(query)
+{
+    if(!query || !query.select) return "";
+    console.log(query.select.split(",").join(" "));
+    return query.select.split(",").join(" ");
+}
+
+function findBootCampsInTheDB(query) {
+    query = formatQuryParmaters(query);
+    return Bootcamp.find(query);
+}
+
+function formatQuryParmaters(query)
+{
+    if(!query)  return {};
+
+    query = removeFieldToExcludeFromTheQury(query);
+    query = addDollarSignAtTheBeginingOfAquryComparisonOperatorsIfThereIs(query);
+    return query;
+}
+
+function addDollarSignAtTheBeginingOfAquryComparisonOperatorsIfThereIs(query)
+{
+    let queryStr = JSON.stringify(query);
+    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
+    query = JSON.parse(queryStr);
+
+    return query;
+}
+
+function removeFieldToExcludeFromTheQury(query)
+{
+    const fieldsToExclude = ["select"];
+    fieldsToExclude.forEach(field => delete query[field]);
+    return query;
+}
 
 //@desc     Get single bootcamp
 //@route    Get /api/v1/bootcamps/:id
@@ -101,12 +141,18 @@ exports.getBootcampWithInRadius = asyncHandler(async (req, res, next) =>
     const loction = await getLatitudeAndLongitude(zipcode)
     const radiusAroundTheLoction = findRadiousAroundTheLoctionInKm(distance);
 
-    const bootcamps = await Bootcamp.find({
-        location: { $geoWithin: { $centerSphere: [loction, radiusAroundTheLoction]} }
-    })
+    const bootcamps = await findBootcampWithinRangeInTheDB(loction, radiusAroundTheLoction)
 
     returnSuccessRespondToTheClient(res, 200, bootcamps); 
 });
+
+
+async function findBootcampWithinRangeInTheDB(loction, radiusAroundTheLoction) {
+    const bootcampsWithinRange = await Bootcamp.find({
+        location: { $geoWithin: { $centerSphere: [loction, radiusAroundTheLoction] } }
+    });
+    return bootcampsWithinRange;
+}
 
 async function getLatitudeAndLongitude(zipcode)
 {

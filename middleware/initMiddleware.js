@@ -15,7 +15,7 @@ function initMiddleware(app)
     initRoutesMiddleware(app);
     app.use(errorHandler);
     
-    app.get('/', (req, res) => {
+    app.get('/', (_req, res) => {
         res.send('Hello from express');
     })    
 }
