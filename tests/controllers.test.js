@@ -10,13 +10,19 @@ const
 } = require("../controllers/bootcamps");
 
 const connectDB = require("../config/db");
+const Bootcamps = require("../models/Bootcamps");
 
+var bootcampCount;
 
 beforeAll(() => {
     connectDB();
 });
 
 describe("check the bootcamp controller", () => {
+    beforeAll(() => {
+        return Bootcamps.count().then(count => bootcampCount = count);
+    })
+    
     test("check that the bootcamps contoler method exist", () => {
         expect(getBootcamps).toBeTruthy();
         expect(getBootcamp).toBeTruthy();
@@ -109,7 +115,7 @@ describe("check the bootcamp controller", () => {
             json: (obj) => {
                 expect(obj.success).toBeTruthy();
                 expect(obj.data).toBeTruthy();
-                expect(obj.data.length).toBe(4);
+                expect(obj.data.length).toBe(bootcampCount);
             }
         }
 
@@ -183,7 +189,62 @@ describe("check the bootcamp controller", () => {
         return getBootcamps(req, res);
     });
 
+    test("sort all boot camps by averageCost", () =>{
+        const res = {
+            status: function(status){
+            if(status == 200) return this;
+            else throw new error("there is error");
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.data
+                    .every((v,i,a) => !i || a[i-1].averageCost <= v.averageCost))
+                    .toBe(true);
+            }
+        }  
+
+        const req = {query: {sort: "averageCost"}};
+
+        return getBootcamps(req, res);
+    });
+
+    test("limit and page seperate the bootcamps", () =>{
+        let LastId = "";
+        let nextPage = {};
+        const res = {
+            status: function(status){
+            if(status == 200) return this;
+            else throw new error("there is error");
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.data[0].id).not.toBe(LastId);
+
+                LastId = obj.data[0].id;
+            }
+        }  
+
+        const req = {query: {limit: "1", page: "1", select: "id"}};
+
+        return GetAllTheBootCampsPages(req, res, nextPage);
+            
+            
+    });
+
 });
+
+async function GetAllTheBootCampsPages(req, res)
+{
+    while(req.query.page <= bootcampCount)
+    {
+        await getBootcamps(req, res);
+        req.query.page++;
+    }
+
+}
+
 
 async function bootcampCRUDcheck(req, res, id)
 {
@@ -220,5 +281,5 @@ async function DeleteTheTestBootCampAndReturnTrueIfsuccess(req, res, id)
     await deleteBootcamp(req, res);
     await getBootcamp(req, res).catch(e => deletesuccess = true);
 
-    return writeSucses;
+    return deletesuccess;
 }

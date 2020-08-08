@@ -8,20 +8,61 @@ const asyncHandler = require("../middleware/async");
 //@access   public
 exports.getBootcamps = asyncHandler(async (req, res, next) => 
 {
-    let query = findBootCampsInTheDB({ ...req.query });
-    const select = selectFields(req.query)
-    
-    query = query.select(select);
-    const bootcamps = await query;
+    const bootcamps = await createQuerySearchInTheDB(req);
 
-    returnSuccessRespondToTheClient(res, 200, bootcamps);
+    const pagination = await FormatPagination(req.query);
+
+    returnSuccessRespondToTheClientWithPage(res, 200, bootcamps, pagination);
 });
 
-function selectFields(query)
+async function createQuerySearchInTheDB(req) {
+    let query = findBootCampsInTheDB({ ...req.query });
+    if(!req.query) return query.sort("-createdAt");
+
+    const select = FormatSelectOrSortFields(req.query.select);
+    const sort = FormatSelectOrSortFields(req.query.sort);
+    const {limit, skip} = findTheLimitAndPage(req.query);
+    query = query.select(select);
+    query = query.sort(sort);
+    query = query.skip(skip);
+    query = query.limit(limit);
+    return query;
+}
+
+async function FormatPagination(query)
 {
-    if(!query || !query.select) return "";
-    console.log(query.select.split(",").join(" "));
-    return query.select.split(",").join(" ");
+    if(!query) return {};
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 100;
+    const endIndex = (page * limit);
+    const startIndex = (page - 1) * limit;
+    const total = await Bootcamp.count();
+
+    const pagination = {};
+
+    if(endIndex < total) 
+        pagination.next = {page: page + 1, limit}
+    
+    if(startIndex > 0) 
+        pagination.last = {page: page - 1, limit}
+
+    return pagination;
+
+}
+
+function findTheLimitAndPage(query)
+{
+    const page = parseInt(query.page, 10) || 1;
+    const limit = parseInt(query.limit, 10) || 100;
+    const skip = (page - 1) * limit;
+    
+    return {limit, skip};
+}
+
+function FormatSelectOrSortFields(field)
+{
+    if(!field) return "";
+    return field.split(",").join(" ");
 }
 
 function findBootCampsInTheDB(query) {
@@ -49,7 +90,7 @@ function addDollarSignAtTheBeginingOfAquryComparisonOperatorsIfThereIs(query)
 
 function removeFieldToExcludeFromTheQury(query)
 {
-    const fieldsToExclude = ["select"];
+    const fieldsToExclude = ["select", "sort", "limit", "page"];
     fieldsToExclude.forEach(field => delete query[field]);
     return query;
 }
@@ -189,7 +230,17 @@ function returnSuccessRespondToTheClient(res, status, data)
 {
     res.status(status).json({
         success: true,
-        data: data
+        data
     });
 }
+
+function returnSuccessRespondToTheClientWithPage(res, status, data, pagination)
+{
+    res.status(status).json({
+        success: true,
+        data,
+        pagination
+    });
+}
+
 
