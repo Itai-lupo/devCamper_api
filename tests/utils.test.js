@@ -1,15 +1,17 @@
 const dotenv = require("../utils/dotenvInit");
 const geocoder = require("../utils/Geocoder");
 
-
-test("check the env vars defined", () => 
+describe("env vars test", () => {
+   test("check the env vars defined", () => 
 {
     expect(process.env.NODE_ENV).toBeTruthy();
     expect(process.env.PORT).toBeTruthy();
     expect(process.env.MONGO_URI).toBeTruthy();
     expect(process.env.GEOCODER_PROVIDER).toBeTruthy();
     expect(process.env.GEOCODER_API_KEY).toBeTruthy();
+}) 
 })
+
 
 describe("test the geocoder", () =>
 {

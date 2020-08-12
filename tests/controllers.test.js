@@ -8,9 +8,10 @@ const
     deleteBootcamp,
     getBootcampWithInRadius
 } = require("../controllers/bootcamps");
-
 const connectDB = require("../config/db");
 const Bootcamps = require("../models/Bootcamps");
+const CoursesControler = require("../controllers/courses");
+const Courses = require("../models/Courses");
 
 var bootcampCount;
 
@@ -105,6 +106,8 @@ describe("check the bootcamp controller", () => {
     });
 
     test("find all bootcamps on earth using within radios", () => {
+        return; //dont run evry time becose there is requst limit and I dont want to reach to it becose of this test
+        
         const res = {
 
             status: function(status){
@@ -176,9 +179,10 @@ describe("check the bootcamp controller", () => {
             json: (obj) => {
                 expect(obj.success).toBeTruthy();
                 expect(obj.data).toBeTruthy();
+                console.log(obj);
                 expect(obj.data.every(v => 
                    {
-                        return Object.keys(v.toObject()).length == 2 
+                        return Object.keys(v.toObject()).length == 3; 
                     }))
                     .toBe(true);
             }
@@ -233,53 +237,95 @@ describe("check the bootcamp controller", () => {
             
     });
 
-});
-
-async function GetAllTheBootCampsPages(req, res)
-{
-    while(req.query.page <= bootcampCount)
+    async function GetAllTheBootCampsPages(req, res)
     {
-        await getBootcamps(req, res);
-        req.query.page++;
+        while(req.query.page <= bootcampCount)
+        {
+            await getBootcamps(req, res);
+            req.query.page++;
+        }
+
     }
 
-}
+
+    async function bootcampCRUDcheck(req, res, id)
+    {
+
+        await cleanTheDbFromTheTestBootCampIfNeded(req, res, id);
 
 
-async function bootcampCRUDcheck(req, res, id)
-{
+        let createSuccess = await createTheTestBootCampAndReturnTrueIfsuccess(req, res, id);
+        let deletesuccess = await DeleteTheTestBootCampAndReturnTrueIfsuccess(req, res, id);
+        return createSuccess && deletesuccess;
+    }
 
-    await cleanTheDbFromTheTestBootCampIfNeded(req, res, id);
+    async function cleanTheDbFromTheTestBootCampIfNeded(req, res, id)
+    {
 
+        let deleteFirst = true; 
+        await getBootcamp(req, res).catch(e => {
+            if(e.message = `bootcamp wan't found with id of ${id}`) deleteFirst = false;
+        });
+        if(deleteFirst) await deleteBootcamp(req, res);
+    }
 
-    let createSuccess = await createTheTestBootCampAndReturnTrueIfsuccess(req, res, id);
-    let deletesuccess = await DeleteTheTestBootCampAndReturnTrueIfsuccess(req, res, id);
-    return createSuccess && deletesuccess;
-}
+    async function createTheTestBootCampAndReturnTrueIfsuccess(req, res, id)
+    {
+        let createSuccess = true;
+        await createBootcamp(req, res);
+        await getBootcamp(req, res).catch(e => createSuccess = false);
+        return createSuccess;
+    }
 
-async function cleanTheDbFromTheTestBootCampIfNeded(req, res, id)
-{
+    async function DeleteTheTestBootCampAndReturnTrueIfsuccess(req, res, id)
+    {
+        deletesuccess = false;
+        await deleteBootcamp(req, res);
+        await getBootcamp(req, res).catch(e => deletesuccess = true);
 
-    let deleteFirst = true; 
-    await getBootcamp(req, res).catch(e => {
-        if(e.message = `bootcamp wan't found with id of ${id}`) deleteFirst = false;
-    });
-    if(deleteFirst) await deleteBootcamp(req, res);
-}
+        return deletesuccess;
+    }
+});
 
-async function createTheTestBootCampAndReturnTrueIfsuccess(req, res, id)
-{
-    let createSuccess = true;
-    await createBootcamp(req, res);
-    await getBootcamp(req, res).catch(e => createSuccess = false);
-    return createSuccess;
-}
+var coursesAmount;
 
-async function DeleteTheTestBootCampAndReturnTrueIfsuccess(req, res, id)
-{
-    deletesuccess = false;
-    await deleteBootcamp(req, res);
-    await getBootcamp(req, res).catch(e => deletesuccess = true);
+describe("check the bootcamp controller", () => {
+   
+    beforeAll(() => {
+        return Courses.count().then(count => coursesAmount = count);
+    })
 
-    return deletesuccess;
-}
+    test("get all courses", () => {
+        res = {
+            status: function(statusCode){
+                if(statusCode == 200) return res;
+                else throw new Error(`something went wrong code: ${statusCode}`);
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+                expect(obj.count).toBe(coursesAmount);
+            }
+
+        }
+
+        return CoursesControler.getAllCourses({}, res, null);
+    })
+
+    test("get all courses of one bootcamp(path var)", () => {
+        res = {
+            status: function(statusCode){
+                if(statusCode == 200) return res;
+                else throw new Error(`something went wrong code: ${statusCode}`);
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy(); 
+            }
+
+        }
+
+        return CoursesControler.getAllCourses({params: {bootcampId: "5d725a1b7b292f5f8ceff788"}}, res, null);
+    })
+
+});

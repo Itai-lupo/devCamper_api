@@ -17,15 +17,26 @@ exports.getBootcamps = asyncHandler(async (req, res, next) =>
 
 async function createQuerySearchInTheDB(req) {
     let query = findBootCampsInTheDB({ ...req.query });
+    
     if(!req.query) return query.sort("-createdAt");
 
     const select = FormatSelectOrSortFields(req.query.select);
     const sort = FormatSelectOrSortFields(req.query.sort);
     const {limit, skip} = findTheLimitAndPage(req.query);
-    query = query.select(select);
-    query = query.sort(sort);
-    query = query.skip(skip);
-    query = query.limit(limit);
+
+    query = createTheQuryPromess(query, {select,  sort, skip, limit});
+    return query;
+}
+
+function createTheQuryPromess(query, params ) {
+    
+    if (params.select == "" || params.select.includes("courses"))
+        query = query.populate("courses");
+
+    query = query.select(params.select);
+    query = query.sort(params.sort);
+    query = query.skip(params.skip);
+    query = query.limit(params.limit);
     return query;
 }
 
@@ -167,9 +178,11 @@ exports.deleteBootcamp = asyncHandler(async (req, res, next) =>
 
 async function deleteBootcampInTheDB(id)
 {
-    const bootcamp = await Bootcamp.findByIdAndDelete(id);
+    const bootcamp = await Bootcamp.findById(id);
 
     checkIfBootcampFoundIfNotThrowErr(bootcamp, id);
+
+    bootcamp.remove();
 }  
 
 //@desc     GET new bootcamp

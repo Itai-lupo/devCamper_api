@@ -5,6 +5,7 @@ const errorHandler = require("./error");
 
 //route files
 const bootcamps = require('../routes/bootcamps');
+const courses = require('../routes/coures');
 
 function initMiddleware(app)
 {
@@ -15,15 +16,13 @@ function initMiddleware(app)
     initRoutesMiddleware(app);
     app.use(errorHandler);
     
-    app.get('/', (_req, res) => {
-        res.send('Hello from express');
-    })    
+      
 }
 
 function initRoutesMiddleware(app)
 {
     app.use('/api/v1/bootcamps', bootcamps);
-
+    app.use('/api/v1/courses', courses);
 }
 
 module.exports = initMiddleware; 

@@ -1,4 +1,5 @@
 const express = require("express");
+const CoursesControler = require('../controllers/courses')
 const 
     { 
         getBootcamp,
@@ -23,6 +24,9 @@ router.route("/:id")
     .delete(deleteBootcamp);
 
 router.route("/radius/:zipcode/:distance")
-    .get(getBootcampWithInRadius)
+    .get(getBootcampWithInRadius);
+
+router.route("/:bootcampId/courses")
+    .get(CoursesControler.getAllCourses);
 
 module.exports = router;
