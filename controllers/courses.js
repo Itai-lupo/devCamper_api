@@ -69,7 +69,11 @@ class CoursesControler
     // @access: private
     static deleteCourse = asyncHandler( async(req, res, next) => 
     {
-        await Course.findByIdAndRemove(req.params.id) 
+        const bootCampToDelete = await Course.findById(req.params.id);
+
+        checkIfCourseFoundIfNotThrowErr(bootCampToDelete, req.params.id);
+
+        await (bootCampToDelete).remove();
 
         returnSuccessRespondToTheClient(res, 200, []);
     })

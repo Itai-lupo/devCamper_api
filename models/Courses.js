@@ -41,13 +41,50 @@ const coursesSchema = new mongoose.Schema({
     }
 });
 
+coursesSchema.statics.getAvgCost = (async function(bootcampId) 
+{
+    console.log("compete avg cost for ", bootcampId);
+    
+    const obj = await this.aggregate([
+    {
+        $match: { bootcamp: bootcampId }
+    },
+    {
+        $group: {
+        _id: '$bootcamp',
+        averageCost: { $avg: '$tuition' }
+        }
+    }
+    ]);
+
+    console.log(obj);
+    try
+    {
+        await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {
+            averageCost: Math.floor(obj[0].averageCost)
+        });
+    }
+    catch(e)
+    {
+        console.log(e)
+    }
+}); 
+
+coursesSchema.post('save', async function(){
+    await this.constructor.getAvgCost(this.bootcamp);
+});
+
+coursesSchema.pre('remove', async function(){
+    await this.constructor.getAvgCost(this.bootcamp);
+});
+
 coursesSchema.pre('save', async function(next){
     const bootcamp = await Bootcamps.findById(this.bootcamp);
     if(!bootcamp){
         throw new ErrorResponse(`no bootcamp with id: ${this.bootcamp}, please use valid bootcamp id`, 404);
     }
 
-    next();
-})
+    next(); 
+});
 
 module.exports = mongoose.model("Courses", coursesSchema);

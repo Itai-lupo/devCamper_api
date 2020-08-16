@@ -42,8 +42,8 @@ async function deleteData()
 {
     try 
     {
-        await Bootcamp.deleteMany();
         await Course.deleteMany();
+        await Bootcamp.deleteMany();
         console.log("data deleted");
         process.exit();  
     } 
