@@ -37,16 +37,21 @@ describe("check the courses routes", () => {
         expect(courses).toBeTruthy();
     })
 
-    test("test that the bootcamp have 1 routes", () =>{
-        expect(courses.stack.length).toBe(1);
+    test("test that the bootcamp have 2 routes", () =>{
+        expect(courses.stack.length).toBe(2);
     })
  
     test("test that the bootcamp have the right paths", () =>{
         expect(courses.stack[0].route.path).toBe("/");
+        expect(courses.stack[1].route.path).toBe("/:id");
     })
 
     test("test that the bootcamp have all the requred methods in the right routes", () =>{
         expect(courses.stack[0].route.methods.get).toBeTruthy();
-         
+        expect(courses.stack[0].route.methods.post).toBeTruthy();
+
+        expect(courses.stack[1].route.methods.get).toBeTruthy();  
+        expect(courses.stack[1].route.methods.put).toBeTruthy();
+        expect(courses.stack[1].route.methods.delete).toBeTruthy();       
     })
 })

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const Bootcamps = require("./Bootcamps");
+const ErrorResponse = require("../utils/errorResponse");
 
 const coursesSchema = new mongoose.Schema({
     title:{
@@ -38,5 +40,14 @@ const coursesSchema = new mongoose.Schema({
         required: true
     }
 });
+
+coursesSchema.pre('save', async function(next){
+    const bootcamp = await Bootcamps.findById(this.bootcamp);
+    if(!bootcamp){
+        throw new ErrorResponse(`no bootcamp with id: ${this.bootcamp}, please use valid bootcamp id`, 404);
+    }
+
+    next();
+})
 
 module.exports = mongoose.model("Courses", coursesSchema);

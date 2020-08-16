@@ -6,10 +6,10 @@ class CoursesControler
 {
     // @route: GET /api/v1/courses/:bootcampId/courses
     // @route: GET /api/v1/courses/
-    // @access   public
+    // @access:   public
     static getAllCourses = asyncHandler( async (req, res, next) =>
     {
-        let query = getBootCampIdIfThereIs(req);
+        let query = getBootCampIdFrom_req(req);
         const courses = await Course.find(query).populate(
             {
             path: "bootcamp",
@@ -20,9 +20,63 @@ class CoursesControler
     })
 
     
+    // @route: GET /api/v1/courses/:id
+    // @access: public
+    static getSingleCourse = asyncHandler( async (req, res, next) =>
+    {
+        
+        const courses = await Course.findById(req.params.id).populate(
+            {
+            path: "bootcamp",
+            select: "name description"
+            });
+
+        checkIfCourseFoundIfNotThrowErr(courses, req.params.id)
+
+        returnSuccessRespondToTheClient(res, 200, courses);
+    })
+
+
+    // @route: Post /api/v1/courses/
+    // @access: private
+    static createCourse = asyncHandler( async (req, res, next) =>
+    {
+        
+        const courses = await Course.create(req.body)
+
+        checkIfCourseFoundIfNotThrowErr(courses, req.params.id)
+
+        returnSuccessRespondToTheClient(res, 201, courses);
+    })
+
+
+    // @route: Put /api/v1/courses/:id
+    // @access: private
+    static updateCourse = asyncHandler( async(req, res, next) => 
+    {
+        const course = await  Course.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        }) 
+        
+        checkIfCourseFoundIfNotThrowErr(courses, req.params.id)
+
+        returnSuccessRespondToTheClient(res, 200, courses);
+    })
+
+
+    // @route: Delete /api/v1/courses/:id
+    // @access: private
+    static deleteCourse = asyncHandler( async(req, res, next) => 
+    {
+        await Course.findByIdAndRemove(req.params.id) 
+
+        returnSuccessRespondToTheClient(res, 200, []);
+    })
+    
 }
 
-function getBootCampIdIfThereIs(req)
+function getBootCampIdFrom_req(req)
 {
     let query = {};
     if(req.params && req.params.bootcampId ) 
@@ -39,7 +93,7 @@ function checkIfCourseFoundIfNotThrowErr(course, id)
 {
     if(!course)
     {
-        throw new ErrorResponse(`bootcamp wan't found with id of ${id}`, 404);
+        throw new ErrorResponse(`course wan't found with id of ${id}`, 404);
     }
 }
 

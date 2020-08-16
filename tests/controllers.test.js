@@ -143,7 +143,9 @@ describe("check the bootcamp controller", () => {
             json: (obj) => {
                 expect(obj.success).toBeTruthy();
                 expect(obj.data).toBeTruthy();
-                expect(obj.data.every(v => v.averageCost <= 10000)).toBe(true);
+                expect(obj.data
+                    .every(v => v.averageCost <= 10000))
+                    .toBe(true);
             }
         }
 
@@ -179,7 +181,6 @@ describe("check the bootcamp controller", () => {
             json: (obj) => {
                 expect(obj.success).toBeTruthy();
                 expect(obj.data).toBeTruthy();
-                console.log(obj);
                 expect(obj.data.every(v => 
                    {
                         return Object.keys(v.toObject()).length == 3; 
@@ -202,6 +203,7 @@ describe("check the bootcamp controller", () => {
             json: (obj) => {
                 expect(obj.success).toBeTruthy();
                 expect(obj.data).toBeTruthy();
+                console.log(obj);
                 expect(obj.data
                     .every((v,i,a) => !i || a[i-1].averageCost <= v.averageCost))
                     .toBe(true);
@@ -289,7 +291,7 @@ describe("check the bootcamp controller", () => {
 
 var coursesAmount;
 
-describe("check the bootcamp controller", () => {
+describe("check the course controller", () => {
    
     beforeAll(() => {
         return Courses.count().then(count => coursesAmount = count);
@@ -310,7 +312,7 @@ describe("check the bootcamp controller", () => {
         }
 
         return CoursesControler.getAllCourses({}, res, null);
-    })
+    });
 
     test("get all courses of one bootcamp(path var)", () => {
         res = {
@@ -326,6 +328,84 @@ describe("check the bootcamp controller", () => {
         }
 
         return CoursesControler.getAllCourses({params: {bootcampId: "5d725a1b7b292f5f8ceff788"}}, res, null);
-    })
+    });
+
+
+    test("check that the courses controler can Delete create and get single course in db", 
+        () => {
+        const res = {
+            status: function(status){
+            if(status == 200 || status == 201) return this;
+            else throw new Error("there is error");
+            },
+            json: (obj) => {
+                expect(obj.success).toBeTruthy();
+                expect(obj.data).toBeTruthy();
+            }
+        }
+
+        const id = "5d725a1b7b292f5f8ceff781";
+
+        const req = { 
+            body: 
+            {
+                
+                _id: id,
+                title: "IOS Development",
+                description: "Get started building mobile applications for IOS using Swift and other tools",
+                weeks: 8,
+                tuition: 6000,
+                minimumSkill: "intermediate",
+                scholarhipsAvailable: false,
+                bootcamp: "5d725a1b7b292f5f8ceff788"
+                
+            },
+            params:
+            {
+                id
+            }
+
+        };
+        
+        return expect(courseCRUDcheck(req, res, id)).toBeTruthy();
+    });
+
+    async function courseCRUDcheck(req, res, id)
+    {
+
+        await cleanTheDbFromTheTestCourseIfNeded(req, res, id);
+
+
+        let createSuccess = await createTheTestCourseAndReturnTrueIfsuccess(req, res, id);
+        let deletesuccess = await DeleteTheTestCourseAndReturnTrueIfsuccess(req, res, id);
+        return createSuccess && deletesuccess;
+    }
+
+    async function cleanTheDbFromTheTestCourseIfNeded(req, res, id)
+    {
+
+        let deleteFirst = true; 
+        await CoursesControler.getAllCourses(req, res).catch(e => {
+            if(e.message = `course wan't found with id of ${id}`) deleteFirst = false;
+        });
+        if(deleteFirst) await CoursesControler.deleteCourse(req, res);
+    }
+
+    async function createTheTestCourseAndReturnTrueIfsuccess(req, res, id)
+    {
+        let createSuccess = true;
+        await CoursesControler.createCourse(req, res);
+        await CoursesControler.getSingleCourse(req, res).catch(e => createSuccess = false);
+        return createSuccess;
+    }
+
+    async function DeleteTheTestCourseAndReturnTrueIfsuccess(req, res, id)
+    {
+        deletesuccess = false;
+        await CoursesControler.deleteCourse(req, res);
+        await CoursesControler.getSingleCourse(req, res).catch(e => deletesuccess = true);
+
+        return deletesuccess;
+    }
 
 });
