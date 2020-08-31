@@ -1,15 +1,14 @@
 const dotenv = require("./utils/dotenvInit");
-const express = require("express");
-const initMiddleware = require("./middleware/initMiddleware");
 const connectDB = require("./config/db");
-
+const expressApi = require("./IO_Mangers/ApiManger/expressApi");
 
 
 const PORT = process.env.PORT || 5000;
 
-const app = express();
+
+const server = expressApi(PORT);
+
 connectDB();
-initMiddleware(app);
 
 
 const server = app.listen(PORT, console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`));
@@ -17,5 +16,6 @@ const server = app.listen(PORT, console.log(`Server running in ${process.env.NOD
 process.on("unhandledRejection", (err, promise) => {
     console.log(`error: ${err.message}`);
 
-    server.close(() => process.exit(1));
+    server.close();
+    process.exit(1)
 })

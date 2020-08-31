@@ -1,6 +1,6 @@
-const ErrorResponse = require("../utils/errorResponse");
+const ErrorResponse = require("../../../utils/errorResponse");
 const Course = require("../models/Courses");
-const asyncHandler = require("../middleware/async");
+const asyncHandler = require("../../../middleware/async");
 
 class CoursesControler
 {

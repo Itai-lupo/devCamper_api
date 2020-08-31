@@ -1,5 +1,5 @@
 const express = require("express");
-const CoursesControler = require('../controllers/courses')
+const CoursesControler = require('../../DBManger/controllers/courses')
 const 
     { 
         getBootcamp,
@@ -10,7 +10,7 @@ const
         getBootcampWithInRadius
     } 
     =
-    require("../controllers/bootcamps");
+    require("../../DBManger/controllers/bootcamps");
 
 const router = express.Router();
 

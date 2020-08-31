@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Bootcamps = require("./Bootcamps");
-const ErrorResponse = require("../utils/errorResponse");
+const ErrorResponse = require("../../../utils/errorResponse");
 
 const coursesSchema = new mongoose.Schema({
     title:{
