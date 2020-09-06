@@ -9,7 +9,7 @@ export default interface IDBManager {
 	createBootcamp(bootcampToCreate);
 	updateBootcamp(id, dataToUpdate)
 	deleteBootcamp(id);
-	getBootcampWithInRadius(loction, radiusAroundTheLoction);
+	getBootcampWithinRadius(loction, radiusAroundTheLoction);
 	getBootcampAmount();
 
 	getAllCourses(query);

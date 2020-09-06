@@ -1,4 +1,5 @@
 import asyncHandler  = require("../utils/async");
+import geocoder = require("../utils/Geocoder");
 
 export default class coursesLogic
 {
@@ -32,9 +33,7 @@ export default class coursesLogic
 
         const endIndex = (page * limit);
         const startIndex = (page - 1) * limit;
-
-        const total = this.db.getBootcampAmount()
-
+        const total =  this.db.getBootcampAmount()
         const pagination:any = {};
 
         if(endIndex < total) 
@@ -68,13 +67,65 @@ export default class coursesLogic
     }
 
     getBootCamp = asyncHandler( async (req, res, next) => {
-        let id = req.params.id;       
+        const id = req.params.id;       
 
         const resBootCamps = await this.db.getBootcamp(id);
 
         this.returnSuccessRespondToTheClient(res, 200, resBootCamps);
     })
 
+
+    createBootcamp = asyncHandler( async (req, res, next) => {
+        const bootcampToCreate = req.body;       
+
+        const resBootCamps = await this.db.createBootcamp(bootcampToCreate);
+
+        this.returnSuccessRespondToTheClient(res, 200, resBootCamps);
+    })
+
+    updateBootcamp = asyncHandler( async (req, res, next) => {
+        const id = req.params.id; 
+        const changesToTheBootcamp = req.body;       
+
+        const resBootCamps = await this.db.updateBootcamp(id, changesToTheBootcamp);
+
+        this.returnSuccessRespondToTheClient(res, 200, resBootCamps);
+    })
+
+    deleteBootcamp = asyncHandler( async (req, res, next) => {
+        const id = req.params.id;  
+
+        const resBootCamps = await this.db.deleteBootcamp(id);
+
+        this.returnSuccessRespondToTheClient(res, 200, {});
+    })
+
+    getBootcampWithinRadius = asyncHandler( async (req, res, next) => {
+        const {zipcode, distance} = req.params;
+
+        const loction = await this.getLatitudeAndLongitude(zipcode)
+        const radiusAroundTheLoction = this.findRadiousAroundTheLoctionInKm(distance);
+
+        const bootcamps = await this.db.getBootcampWithinRadius(loction, radiusAroundTheLoction)
+
+        this.returnSuccessRespondToTheClient(res, 200, bootcamps); 
+    })
+
+    async getLatitudeAndLongitude(zipcode)
+    {
+        const loc = await geocoder.geocode(zipcode);
+        const lat = loc[0].latitude;
+        const lng = loc[0].longitude; 
+    
+        return [lng, lat]
+    }
+    
+    findRadiousAroundTheLoctionInKm(distance)
+    {
+        const EarthRadius = 6371;
+        const radiusAroundTheLoction = distance/EarthRadius
+        return radiusAroundTheLoction;
+    }
 
 
     private returnSuccessRespondToTheClient(res, status, data)

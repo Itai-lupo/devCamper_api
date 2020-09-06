@@ -73,7 +73,7 @@ export default class mangoDBManger implements IDBManager
         return deletedBootcamp;
     }
 
-    async getBootcampWithInRadius(loction: any, radiusAroundTheLoction: any) 
+    async getBootcampWithinRadius(loction: any, radiusAroundTheLoction: any) 
     {
         const bootcampsWithinRange = await Bootcamp.find({
             location: { $geoWithin: { $centerSphere: [loction, radiusAroundTheLoction] } }

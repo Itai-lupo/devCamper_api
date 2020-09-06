@@ -10,7 +10,7 @@ const
         getBootcampWithInRadius
     } 
     =
-    require("../../DBManger/controllers/bootcamps");
+    require("../../../ArchiveFiles/bootcamps.txt");
 
 const router = express.Router();
 

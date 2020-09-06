@@ -57,7 +57,20 @@ function createDBManger()
 function initIOInputRoutes()
 {
     APIManger.addRoute('get', '/api/v1/bootcamps/', bootcampsManger.getBootCamps);
+    APIManger.addRoute('post', '/api/v1/bootcamps/', bootcampsManger.createBootcamp);
 
     APIManger.addRoute('get', '/api/v1/bootcamps/:id', bootcampsManger.getBootCamp);
+    APIManger.addRoute('put', '/api/v1/bootcamps/:id', bootcampsManger.updateBootcamp);
+    APIManger.addRoute('delete', '/api/v1/bootcamps/:id', bootcampsManger.deleteBootcamp);
 
+    APIManger.addRoute('get', '/api/v1/bootcamps/radius/:zipcode/:distance', bootcampsManger.getBootcampWithinRadius);
+
+    APIManger.addRoute('get', '/api/v1/bootcamps/:bootcampId/courses', coursesManger.getAllCourses);
+    
+    APIManger.addRoute('get', '/api/v1/courses', coursesManger.getAllCourses);
+    APIManger.addRoute('post', '/api/v1/courses', coursesManger.createCourse);
+
+    APIManger.addRoute('get', '/api/v1/courses/:id', coursesManger.getAllCourses);
+    APIManger.addRoute('put', '/api/v1/courses/:id', coursesManger.updateCourse);
+    APIManger.addRoute('delete', '/api/v1/courses/:id', coursesManger.deleteCourse);
 }
