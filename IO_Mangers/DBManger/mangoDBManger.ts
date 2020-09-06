@@ -13,7 +13,8 @@ export default class mangoDBManger implements IDBManager
     private bootcampAmount: number;
     private coursesAmount: number;
 
-    connect(): void {
+    connect(): void 
+    {
         connectDB();
 
         Bootcamp.countDocuments().then(count => this.bootcampAmount = count);
@@ -32,6 +33,8 @@ export default class mangoDBManger implements IDBManager
     
 
     private addOnTheFindPromeseTheQuery(params: any, dbRequst: any) {
+        if(Object.keys(params).length === 0) return dbRequst;
+
         if (params.select == "" || params.select.includes("courses"))
             dbRequst = dbRequst.populate("courses");
 
@@ -68,7 +71,7 @@ export default class mangoDBManger implements IDBManager
 
     async deleteBootcamp(id: any) 
     {
-        const deletedBootcamp = await Bootcamp.findById(id);
+        const deletedBootcamp = await Bootcamp.findByIdAndRemove(id);
 
         return deletedBootcamp;
     }

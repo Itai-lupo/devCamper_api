@@ -5,12 +5,12 @@ const dotenv = require("dotenv");
 dotenv.config({path: './config/config.env'});
 
 const mongoose = require("mongoose");
-const Bootcamp = require('./models/Bootcamps');
-const Course = require('./models/Courses');
+const Bootcamp = require('./IO_Mangers/DBManger/models/Bootcamps');
+const Course = require('./IO_Mangers/DBManger/models/Courses');
 
 const fs = require("fs");
 
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGO_TEST_URI, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useFindAndModify: false,

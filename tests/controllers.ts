@@ -1,19 +1,8 @@
-const dotenv = require("../utils/dotenvInit");
-const 
-{ 
-    getBootcamp,
-    getBootcamps,
-    createBootcamp, 
-    updateBootcamp, 
-    deleteBootcamp,
-    getBootcampWithInRadius
-} = require("../controllers/bootcamps");
-const connectDB = require("../config/db");
-const Bootcamps = require("../models/Bootcamps");
-const CoursesControler = require("../controllers/courses");
-const Courses = require("../models/Courses");
+require("../utils/dotenvInit");
 
-var bootcampCount;
+
+const connectDB = require("../config/db");
+
 
 beforeAll(() => {
     connectDB();
