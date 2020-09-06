@@ -1,16 +1,12 @@
-import { IAPIManager } from "./IAPIManager";
-import express from "express";
+import IAPIManager from "./IAPIManager";
+import express = require("express");
 import { Server } from "http";
 
 
-import logger from "../../middleware/logger";
-import errorHandler from "../../middleware/error";
+import logger from "./middleware/logger";
+import errorHandler from "./middleware/error";
 
-//routes files
-const bootcamps = require('./routes/bootcamps');
-const courses = require('./routes/coures');
-
-
+ 
 export default class expressApi implements IAPIManager
 {
 
@@ -22,7 +18,6 @@ export default class expressApi implements IAPIManager
         this.app = express();
 
         this.initMiddleware();
-
 
         const server = this.app.listen(
             port,
@@ -39,21 +34,17 @@ export default class expressApi implements IAPIManager
 
         if(process.env.NODE_ENV === 'development') this.app.use(logger);
         
-        this.initRoutesMiddleware();
         this.app.use(errorHandler);
         
         
     }
 
-    private initRoutesMiddleware(): void
+    public addRoute(method:string, path: string, functionToCall: (req: any, res: any, next: any) => void )
     {
-        this.app.use('/api/v1/bootcamps', bootcamps);
-        this.app.use('/api/v1/courses', courses);
+        this.app[method](path, functionToCall);
     }
 
     close(): void {
         this.server.close();
     }
 }
-
-module.exports = expressApi;

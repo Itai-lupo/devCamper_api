@@ -1,4 +1,4 @@
-function errorHandler(err, req, res, next)
+export default function errorHandler(err, req, res, next)
 {
     console.log(err.stack);
 
@@ -12,5 +12,3 @@ function errorHandler(err, req, res, next)
         err: err.message || "server error"
     })
 }
-
-module.exports = errorHandler;

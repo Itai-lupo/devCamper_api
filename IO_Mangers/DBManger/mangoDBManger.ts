@@ -1,33 +1,47 @@
 import mangodb from "mongodb";
 import ErrorResponse from "../../utils/errorResponse";
 import geocoder from "../../utils/Geocoder";
-import asyncHandler from "../../middleware/async";
+import asyncHandler from "../../utils/async";
 import IDBManager from "./IDBManger";
-const connectDB = require("../../config/db");
+import connectDB from "../../config/db";
 
-import Bootcamp from "./models/Bootcamps";
-import Course from "./models/Courses";
+import Bootcamp = require("./models/Bootcamps");
+import Course = require("./models/Courses");
 
 export default class mangoDBManger implements IDBManager
 {
-    async getBootcamps(qury: any, params) {
-        let dbRequst = Bootcamp.find(qury);
+    private bootcampAmount: number;
+    private coursesAmount: number;
 
-        if(!qury.sort) return dbRequst.sort("-createdAt");
-        if (params.select == "" || params.select.includes("courses"))
+    connect(): void {
+        connectDB();
+
+        Bootcamp.countDocuments().then(count => this.bootcampAmount = count);
+        Course.countDocuments().then(count => this.coursesAmount = count);
         
-        dbRequst = dbRequst.populate("courses");
+    }
+
+    async getBootcamps(qury: any, params) 
+    {
+        let dbRequst = Bootcamp.find(qury);
+        dbRequst = this.addOnTheFindPromeseTheQuery(params, dbRequst);
+
+        const resualtBootcamps = await dbRequst;
+        return resualtBootcamps;
+    }
+    
+
+    private addOnTheFindPromeseTheQuery(params: any, dbRequst: any) {
+        if (params.select == "" || params.select.includes("courses"))
+            dbRequst = dbRequst.populate("courses");
 
         dbRequst = dbRequst.select(params.select);
         dbRequst = dbRequst.sort(params.sort);
         dbRequst = dbRequst.skip(params.skip);
         dbRequst = dbRequst.limit(params.limit);
-
-        let resualtBootcamps = await dbRequst;
-
-        return resualtBootcamps;
+        return dbRequst;
     }
-    
+
     async getBootcamp(id: any) 
     {
         const bootcamp = await Bootcamp.findById(id);
@@ -67,6 +81,11 @@ export default class mangoDBManger implements IDBManager
 
         return bootcampsWithinRange;
     }
+
+    getBootcampAmount() {
+        return this.bootcampAmount;
+    }
+
 
 
 
@@ -117,10 +136,10 @@ export default class mangoDBManger implements IDBManager
         return bootCampToDelete;
     }
 
-
-
-    connect(url: string): void {
-        connectDB();
+    getCourseAmount() {
+        return this.coursesAmount;
     }
+    
+
 
 }

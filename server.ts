@@ -1,4 +1,4 @@
-import dotenv from "./utils/dotenvInit";
+require("./utils/dotenvInit");
 
 import expressApi from "./IO_Mangers/ApiManger/expressApi";
 import IAPIManagers from "./IO_Mangers/ApiManger/IAPIManager";
@@ -6,7 +6,31 @@ import IAPIManagers from "./IO_Mangers/ApiManger/IAPIManager";
 import IDBManger from './IO_Mangers/DBManger/IDBManger';
 import mangoDBManger from './IO_Mangers/DBManger/mangoDBManger';
 
+import bootcampsLogic from './business logic/bootcampUseCases';
+import coursesLogic from './business logic/coursesUseCases'
+
 const PORT: number = parseInt(process.env.PORT) || 5000;
+
+
+const DBManger: IDBManger = createDBManger();
+
+const APIManger: IAPIManagers = createAPIManger();
+
+const bootcampsManger = new bootcampsLogic(DBManger);
+const coursesManger = new coursesLogic(DBManger);
+
+
+DBManger.connect();
+initIOInputRoutes();
+
+process.on("unhandledRejection", (err: any, promise) => {
+    if(!err.message) err.message = "server error";
+    console.log(`error: ${err.message}`);
+
+    APIManger.close();
+    process.exit(1);
+})
+
 
 function createAPIManger()
 {
@@ -30,17 +54,10 @@ function createDBManger()
     }
 }
 
+function initIOInputRoutes()
+{
+    APIManger.addRoute('get', '/api/v1/bootcamps/', bootcampsManger.getBootCamps);
 
-const DBManger: IDBManger = createDBManger();
+    APIManger.addRoute('get', '/api/v1/bootcamps/:id', bootcampsManger.getBootCamp);
 
-
-const APIManger: IAPIManagers = createAPIManger();
-
-
-process.on("unhandledRejection", (err: any, promise) => {
-    if(!err.message) err.message = "server error";
-    console.log(`error: ${err.message}`);
-
-    APIManger.close();
-    process.exit(1);
-})
+}

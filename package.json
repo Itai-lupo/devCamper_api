@@ -2,7 +2,7 @@
   "name": "devcamper_api",
   "version": "1.0.0",
   "description": "devcamper api crated during a online course of creating a full rest api",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
     "start": "NODE_ENV=production node server",
     "dev": "nodemon server",
