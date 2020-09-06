@@ -106,6 +106,8 @@ function removeFieldToExcludeFromTheQury(query)
     return query;
 }
 
+
+
 //@desc     Get single bootcamp
 //@route    Get /api/v1/bootcamps/:id
 //@access   public

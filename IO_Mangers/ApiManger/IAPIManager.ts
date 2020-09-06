@@ -1,3 +1,3 @@
-export interface IAPIManager {
+export default interface IAPIManager {
 	close(): void;
 }

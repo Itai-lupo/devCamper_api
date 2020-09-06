@@ -11,7 +11,7 @@ const bootcamps = require('./routes/bootcamps');
 const courses = require('./routes/coures');
 
 
-class expressApi implements IAPIManager
+export default class expressApi implements IAPIManager
 {
 
 	private server: Server;
@@ -24,9 +24,9 @@ class expressApi implements IAPIManager
         this.initMiddleware();
 
 
-    const server = this.app.listen(
-        port,
-        console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
+        const server = this.app.listen(
+            port,
+            console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
         );
 
 

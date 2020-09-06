@@ -44,7 +44,7 @@ class CoursesControler
         
         const courses = await Course.create(req.body)
 
-        checkIfCourseFoundIfNotThrowErr(courses, req.params.id)
+        // checkIfCourseFoundIfNotThrowErr(courses, req.params.id)
 
         returnSuccessRespondToTheClient(res, 201, courses);
     })
