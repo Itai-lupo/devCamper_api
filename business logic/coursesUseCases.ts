@@ -15,12 +15,12 @@ export default class coursesLogic
 
         let pagination = this.FormatPagination(req.query)
 
-        let params = this.moveTheSearchParamsFromTheQueryToNewObject(query);
+        this.moveTheSearchParamsFromTheQueryToNewObject(query);
 
         query.bootcamp = query.bootcamp || req.params.bootcampId;
         query = this.addDollarSignAtTheBeginingOfAllTheQuryComparisonOperators(query);
 
-        const resCourses = await this.db.getAllCourses(query, params);
+        const resCourses = await this.db.getAllCourses(query);
 
         this.returnSuccessRespondToTheClientWithPage(res, 200, resCourses, pagination);
     })

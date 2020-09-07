@@ -106,9 +106,127 @@ describe("basic CRUD test for the bootcamps", () => {
         return await db.getBootcamps({}, {});
     })
 
+    test("get all bootcamps with housing true", async () => {
+
+        const bootcamps = await db.getBootcamps({housing: true}, {});
+
+        bootcamps.forEach(v => {
+            expect(v.housing).toBe(true);
+        });
+
+        return await db.getBootcamps({}, {});
+    })
+
+    test("get all bootcamps with select of housing and name", async () => {
+
+        const bootcamps = await db.getBootcamps({}, {select: "housing name"});
+
+        bootcamps.forEach(v => {
+            console.log(Object.keys(v.toObject()));
+            expect(Object.keys(v.toObject()).sort()).toEqual(["housing", "_id", "name", "id"].sort());
+        });
+
+        return await db.getBootcamps({}, {});
+    })
+
+    test("get all bootcamps with sort avgCost", async () => {
+
+        const bootcamps = await db.getBootcamps({}, {sort: "-averageCost", select: "averageCost"});
+
+        let last = bootcamps[0]["averageCost"];
+        bootcamps.forEach(v => {
+            expect(v["averageCost"]).toBeLessThanOrEqual(last);
+            last = v["averageCost"];
+        }); 
+
+        return await db.getBootcamps({}, {});
+    })
 })
  
 
+describe("basic CRUD test for the courses", () =>{
+
+    test("read all courses", async () => {
+        const courses = await db.getAllCourses(undefined);
+        const compereCourese:any = await Courses.find();
+        
+        for(let i = 0; i < courses.length; i++)
+        {
+            compereCourese[i].bootcamp = undefined;
+            compereCourese[i] = compereCourese[i].toObject();
+
+            courses[i].bootcamp = undefined;
+            courses[i] = courses[i].toObject();
+        }
+        
+        
+        console.log(courses);
+
+        console.log(compereCourese); 
+        expect(courses).toEqual(compereCourese);
+
+        return await db.getAllCourses({});
+    })
+
+    test("read write delete test", async () => {
+        const ToCreate = {
+            title: "test 1",
+            description: "This course will provide you with all of the essentials to become a successful frontend web developer",
+            weeks: 8,
+            tuition: 8000,
+            minimumSkill: "beginner",
+            scholarhipsAvailable: true,
+            bootcamp: "5d713995b721c3bb38c1f5d0"
+        }
+
+        const Course = await db.createCourse(ToCreate);
+        
+        Object.keys(ToCreate).forEach(key => {
+            if(key !== "bootcamp")
+                expect(ToCreate[key]).toEqual(Course[key]);
+        })
+
+        const deleted = await db.deleteCourse(Course._id);
+
+        expect(deleted.toObject()).toEqual(Course.toObject());
+        
+        expect(await db.getSingleCourse(deleted._id)).toBeNull();
+
+        return await db.getAllCourses({});
+    })
+
+    test("CRUD test", async () => {
+        const ToCreate = {
+            title: "test 1",
+            description: "This course will provide you with all of the essentials to become a successful frontend web developer",
+            weeks: 8,
+            tuition: 8000,
+            minimumSkill: "beginner",
+            scholarhipsAvailable: true,
+            bootcamp: "5d713995b721c3bb38c1f5d0"
+        }
+
+        const Course = await db.createCourse(ToCreate);
+        
+        Object.keys(ToCreate).forEach(key => {
+            if(key !== "bootcamp")
+                expect(ToCreate[key]).toEqual(Course[key]);
+        }) 
+
+        const updated = await db.updateCourse(Course._id, {title: "test 1 U"})
+
+        expect(Course.toObject()).not.toEqual(updated.toObject());
+
+        const deleted = await db.deleteCourse(Course._id);
+
+        expect(deleted.toObject()).toEqual(updated.toObject());
+        
+        expect(await db.getSingleCourse(deleted._id)).toBeNull();
+
+        return await db.getAllCourses({});
+    })
+
+})
 
 
 

@@ -142,7 +142,4 @@ export default class mangoDBManger implements IDBManager
     getCourseAmount() {
         return this.coursesAmount;
     }
-    
-
-
 }
