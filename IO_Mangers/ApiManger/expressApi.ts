@@ -28,6 +28,10 @@ export default class expressApi implements IAPIManager
         this.server = server;
     }
 
+    getApp() {
+        return this.app;
+    }
+
     private initMiddleware(): void
     {
         this.app.use(express.json());

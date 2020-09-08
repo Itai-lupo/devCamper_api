@@ -10,8 +10,8 @@ import Course = require("./models/Courses");
 
 export default class mangoDBManger implements IDBManager
 {
-    private bootcampAmount: number;
-    private coursesAmount: number;
+    private bootcampAmount: number = 0;
+    private coursesAmount: number = 0;
 
     connect(): void 
     {
@@ -54,6 +54,7 @@ export default class mangoDBManger implements IDBManager
 
     async createBootcamp(bootcampToCreate: any) 
     {
+        this.bootcampAmount++;
         const newBootcamp = await Bootcamp.create(bootcampToCreate);
 
         return newBootcamp
@@ -71,6 +72,7 @@ export default class mangoDBManger implements IDBManager
 
     async deleteBootcamp(id: any) 
     {
+        this.bootcampAmount--;
         const deletedBootcamp = await Bootcamp.findByIdAndRemove(id);
 
         return deletedBootcamp;
@@ -85,7 +87,13 @@ export default class mangoDBManger implements IDBManager
         return bootcampsWithinRange;
     }
 
-    getBootcampAmount() {
+    getBootcampAmount() 
+    {
+        Bootcamp.countDocuments({}, (err, count) => {
+            if(err) throw new Error(err);
+            this.bootcampAmount = count;
+        })
+
         return this.bootcampAmount;
     }
 
@@ -116,6 +124,7 @@ export default class mangoDBManger implements IDBManager
 
     async createCourse(CourseToCreate: any) 
     {
+        this.coursesAmount++;
         const newCourse = await Course.create(CourseToCreate);
 
         return newCourse;
@@ -131,7 +140,9 @@ export default class mangoDBManger implements IDBManager
         return updatedCourse;
     }
 
-    async deleteCourse(id: any) {
+    async deleteCourse(id: any) 
+    {
+        this.coursesAmount--;
         const bootCampToDelete = await Course.findById(id);
 
         await (bootCampToDelete).remove();
@@ -139,7 +150,12 @@ export default class mangoDBManger implements IDBManager
         return bootCampToDelete;
     }
 
-    getCourseAmount() {
+    getCourseAmount() 
+    {
+        Course.countDocuments({}, (err, count) => {
+            if(err) throw new Error(err);
+            this.coursesAmount = count;
+        })
         return this.coursesAmount;
     }
 }

@@ -1,7 +1,7 @@
 import asyncHandler  = require("../utils/async");
 import geocoder = require("../utils/Geocoder");
 
-export default class coursesLogic
+export default class bootcampLogic
 {
     private db;
 
@@ -101,6 +101,7 @@ export default class coursesLogic
     })
 
     getBootcampWithinRadius = asyncHandler( async (req, res, next) => {
+        console.log("start");
         const {zipcode, distance} = req.params;
 
         const loction = await this.getLatitudeAndLongitude(zipcode)
@@ -108,10 +109,12 @@ export default class coursesLogic
 
         const bootcamps = await this.db.getBootcampWithinRadius(loction, radiusAroundTheLoction)
 
-        this.returnSuccessRespondToTheClient(res, 200, bootcamps); 
+        console.log("res:");
+        console.log(res);
+        return this.returnSuccessRespondToTheClient(res, 200, bootcamps); 
     })
 
-    async getLatitudeAndLongitude(zipcode)
+    private async getLatitudeAndLongitude(zipcode)
     {
         const loc = await geocoder.geocode(zipcode);
         const lat = loc[0].latitude;
@@ -120,7 +123,7 @@ export default class coursesLogic
         return [lng, lat]
     }
     
-    findRadiousAroundTheLoctionInKm(distance)
+    private findRadiousAroundTheLoctionInKm(distance)
     {
         const EarthRadius = 6371;
         const radiusAroundTheLoction = distance/EarthRadius
@@ -130,7 +133,8 @@ export default class coursesLogic
 
     private returnSuccessRespondToTheClient(res, status, data)
     {
-        res.status(status).json({
+        console.log(res);
+        return res.status(status).json({
             success: true,
             data
         });
@@ -138,7 +142,7 @@ export default class coursesLogic
 
     private returnSuccessRespondToTheClientWithPage(res, status, data, pagination)
     {
-        res.status(status).json({
+        return res.status(status).json({
             success: true,
             data,
             pagination

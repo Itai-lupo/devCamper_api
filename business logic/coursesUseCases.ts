@@ -17,7 +17,8 @@ export default class coursesLogic
 
         this.moveTheSearchParamsFromTheQueryToNewObject(query);
 
-        query.bootcamp = query.bootcamp || req.params.bootcampId;
+        if(req.params)
+            query.bootcamp = query.bootcamp || req.params.bootcampId;
         query = this.addDollarSignAtTheBeginingOfAllTheQuryComparisonOperators(query);
 
         const resCourses = await this.db.getAllCourses(query);

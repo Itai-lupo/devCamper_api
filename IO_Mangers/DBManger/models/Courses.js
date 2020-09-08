@@ -43,7 +43,6 @@ const coursesSchema = new mongoose.Schema({
 
 coursesSchema.statics.getAvgCost = (async function(bootcampId) 
 {
-    console.log("compete avg cost for ", bootcampId);
     
     const obj = await this.aggregate([
     {
@@ -57,7 +56,6 @@ coursesSchema.statics.getAvgCost = (async function(bootcampId)
     }
     ]);
 
-    console.log(obj);
     try
     {
         await this.model("Bootcamp").findByIdAndUpdate(bootcampId, {

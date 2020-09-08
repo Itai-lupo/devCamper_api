@@ -23,10 +23,9 @@ describe("test the geocoder", () =>
 
     
     test("test if the geocoder return geo code",  () => {
-        return; //dont run evry time becose there is requst limit and I dont want to reach to it becose of this test
+        return;
         return geocoder.geocode("45 Upper College Rd Kingston RI 02881")
         .then(data =>{ 
-            console.log(data);
             expect(data[0].formattedAddress)
                 .toBe('45 Upper College Rd, Kingston, RI 02881-2003, US')});
     })

@@ -20,7 +20,14 @@ beforeAll(async () => {
     });
 });
 
+afterAll(() => {
+    return mongoose.disconnect();
+})
+
 describe("basic CRUD test for the bootcamps", () => {
+    beforeAll(() => {
+        db.getBootcampAmount()
+    })
     test("get all bootcamps", async () => {
 
         const bootcamps = await db.getBootcamps({}, {});
@@ -98,12 +105,13 @@ describe("basic CRUD test for the bootcamps", () => {
     })
 
     test("get with in earth radius get all boot camps", async () => {
-        const bootcamps = db.getBootcampWithinRadius([0, 0], 6371);
+        db.getBootcampAmount()
+        const bootcamps = await db.getBootcampWithinRadius([0, 0], 6371);
+        const len = bootcamps.length;
+        expect(len).toBe(db.getBootcampAmount());
 
-        expect(bootcamps.length).toBe(db.getBootcampAmount());
 
-
-        return await db.getBootcamps({}, {});
+        return db.getBootcamps({}, {});
     })
 
     test("get all bootcamps with housing true", async () => {
@@ -122,7 +130,7 @@ describe("basic CRUD test for the bootcamps", () => {
         const bootcamps = await db.getBootcamps({}, {select: "housing name"});
 
         bootcamps.forEach(v => {
-            console.log(Object.keys(v.toObject()));
+            
             expect(Object.keys(v.toObject()).sort()).toEqual(["housing", "_id", "name", "id"].sort());
         });
 
@@ -160,9 +168,7 @@ describe("basic CRUD test for the courses", () =>{
         }
         
         
-        console.log(courses);
-
-        console.log(compereCourese); 
+        
         expect(courses).toEqual(compereCourese);
 
         return await db.getAllCourses({});
@@ -225,7 +231,6 @@ describe("basic CRUD test for the courses", () =>{
 
         return await db.getAllCourses({});
     })
-
 })
 
 
