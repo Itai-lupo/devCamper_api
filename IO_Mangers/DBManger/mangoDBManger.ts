@@ -25,26 +25,14 @@ export default class mangoDBManger implements IDBManager
     async getBootcamps(qury: any, params) 
     {
         let dbRequst = Bootcamp.find(qury);
-        dbRequst = this.addOnTheFindPromeseTheQuery(params, dbRequst);
+        dbRequst = this.addOnTheFindPromeseTheQuery(params, dbRequst, "courses");
 
         const resualtBootcamps = await dbRequst;
         return resualtBootcamps;
     }
     
 
-    private addOnTheFindPromeseTheQuery(params: any, dbRequst: any) {
-        if(Object.keys(params).length === 0) return dbRequst;
-
-        if (params.select == "" || 
-            (params.select.includes("courses") && !params.select.includes("-courses")))
-            dbRequst = dbRequst.populate("courses");
-
-        dbRequst = dbRequst.select(params.select);
-        dbRequst = dbRequst.sort(params.sort);
-        dbRequst = dbRequst.skip(params.skip);
-        dbRequst = dbRequst.limit(params.limit);
-        return dbRequst;
-    }
+    
 
     async getBootcamp(id: any) 
     {
@@ -101,13 +89,14 @@ export default class mangoDBManger implements IDBManager
 
 
 
-    async getAllCourses(query: any) 
+    async getAllCourses(query, params) 
     {
-        const resualtCourses = await Course.find(query).populate(
-            {
-                path: "bootcamp",
-                select: "name description"
-            });
+
+        let dbRequst = Course.find(query);
+        
+        dbRequst = this.addOnTheFindPromeseTheQuery(params, dbRequst, "bootcamp");
+
+        const resualtCourses = await dbRequst;
 
         return resualtCourses;
     }
@@ -158,5 +147,21 @@ export default class mangoDBManger implements IDBManager
             this.coursesAmount = count;
         })
         return this.coursesAmount;
+    }
+
+
+
+    private addOnTheFindPromeseTheQuery(params: any, dbRequst: any, populate) {
+        if(Object.keys(params).length === 0) return dbRequst;
+
+        if (params.select == "" || 
+            (params.select.includes(populate) && !params.select.includes(`-${populate}`)))
+            dbRequst = dbRequst.populate(populate);
+
+        dbRequst = dbRequst.select(params.select);
+        dbRequst = dbRequst.sort(params.sort);
+        dbRequst = dbRequst.skip(params.skip);
+        dbRequst = dbRequst.limit(params.limit);
+        return dbRequst;
     }
 }

@@ -1,5 +1,6 @@
 import asyncHandler  = require("../utils/async");
 import ErrorResponse = require("../utils/errorResponse");
+import queryFormater from '../utils/queryFormater';
 
 export default class coursesLogic
 {
@@ -13,15 +14,13 @@ export default class coursesLogic
     getAllCourses = asyncHandler( async (req, res, next) => {
         let query = req.query || {};
 
-        let pagination = this.FormatPagination(req.query)
-
-        this.moveTheSearchParamsFromTheQueryToNewObject(query);
-
         if(req.params)
             query.bootcamp = query.bootcamp || req.params.bootcampId;
-        query = this.addDollarSignAtTheBeginingOfAllTheQuryComparisonOperators(query);
 
-        const resCourses = await this.db.getAllCourses(query);
+        const coursesTotalAmount = this.db.getCourseAmount()
+        const {pagination, params, formatQuery} = queryFormater(query, coursesTotalAmount);
+        
+        const resCourses = await this.db.getAllCourses(formatQuery, params);
 
         this.returnSuccessRespondToTheClientWithPage(res, 200, resCourses, pagination);
     })

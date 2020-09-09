@@ -12,7 +12,7 @@ export default interface IDBManager {
 	getBootcampWithinRadius(loction, radiusAroundTheLoction);
 	getBootcampAmount();
 
-	getAllCourses(query);
+	getAllCourses(query, params);
 	getSingleCourse(id);
 	createCourse(CourseToCreate);
 	updateCourse(id, dataToUpdate);
