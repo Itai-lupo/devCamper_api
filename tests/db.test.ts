@@ -3,21 +3,32 @@ require('../utils/dotenvInit');
 import IDBManger from '../IO_Mangers/DBManger/IDBManger';
 import mangoDBManger from '../IO_Mangers/DBManger/mangoDBManger';
 import mongoose = require('mongoose');
+import { MongoMemoryServer } from "mongodb-memory-server";
 
 import Bootcamps = require('../IO_Mangers/DBManger/models/Bootcamps');
 import Courses = require('../IO_Mangers/DBManger/models/Courses');
 
+let bootcampsData = require('../_data/bootcamps.json');
+let coursesData = require('../_data/courses.json');
+
 let db:IDBManger;
+let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
+	mongoServer = new MongoMemoryServer();
     db = new mangoDBManger();
 
-    return await mongoose.connect(process.env.MONGO_TEST_URI, {
+	const mongoUri = await mongoServer.getUri();
+    await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useCreateIndex: true,
         useFindAndModify: false,
         useUnifiedTopology: true
     });
+
+    await Bootcamps.create(bootcampsData);
+    return Courses.create(coursesData);
+
 });
 
 afterAll(() => {

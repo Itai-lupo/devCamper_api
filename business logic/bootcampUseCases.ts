@@ -101,16 +101,14 @@ export default class bootcampLogic
     })
 
     getBootcampWithinRadius = asyncHandler( async (req, res, next) => {
-        console.log("start");
         const {zipcode, distance} = req.params;
 
-        const loction = await this.getLatitudeAndLongitude(zipcode)
+        const loction = await this.getLatitudeAndLongitude(zipcode);
+
         const radiusAroundTheLoction = this.findRadiousAroundTheLoctionInKm(distance);
 
-        const bootcamps = await this.db.getBootcampWithinRadius(loction, radiusAroundTheLoction)
-
-        console.log("res:");
-        console.log(res);
+        const bootcamps = await this.db.getBootcampWithinRadius(loction, radiusAroundTheLoction);
+        
         return this.returnSuccessRespondToTheClient(res, 200, bootcamps); 
     })
 
@@ -119,21 +117,20 @@ export default class bootcampLogic
         const loc = await geocoder.geocode(zipcode);
         const lat = loc[0].latitude;
         const lng = loc[0].longitude; 
-    
+        
         return [lng, lat]
     }
     
     private findRadiousAroundTheLoctionInKm(distance)
     {
         const EarthRadius = 6371;
-        const radiusAroundTheLoction = distance/EarthRadius
+        const radiusAroundTheLoction = distance/EarthRadius;
         return radiusAroundTheLoction;
     }
 
 
     private returnSuccessRespondToTheClient(res, status, data)
     {
-        console.log(res);
         return res.status(status).json({
             success: true,
             data

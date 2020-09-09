@@ -3,26 +3,40 @@ require("../utils/dotenvInit");
 import IDBManger from '../IO_Mangers/DBManger/IDBManger';
 import mangoDBManger from '../IO_Mangers/DBManger/mangoDBManger';
 import mongoose = require('mongoose');
+import { MongoMemoryServer } from "mongodb-memory-server";
 
 import bootcampLogic from '../business logic/bootcampUseCases';
 import coursesLogic from '../business logic/coursesUseCases';
 
+import Bootcamps = require('../IO_Mangers/DBManger/models/Bootcamps');
+import Courses = require('../IO_Mangers/DBManger/models/Courses');
+
+let bootcampsData = require('../_data/bootcamps.json');
+let coursesData = require('../_data/courses.json');
+
+
 let db:IDBManger;
 let bootcampManger:bootcampLogic;
 let courseManger:coursesLogic;
+let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
+	mongoServer = new MongoMemoryServer();
     db = new mangoDBManger();
 
     bootcampManger = new bootcampLogic(db);
     courseManger = new coursesLogic(db);
     
-    return await mongoose.connect(process.env.MONGO_TEST_URI, {
+	const mongoUri = await mongoServer.getUri();
+    await mongoose.connect(mongoUri, {
         useNewUrlParser: true,
         useCreateIndex: true,
         useFindAndModify: false,
         useUnifiedTopology: true
     });
+
+    await Bootcamps.create(bootcampsData);
+    return Courses.create(coursesData);
 
 });
 
@@ -55,7 +69,7 @@ describe("test the bootcamp Busines logic modle", () => {
         
     });
 
-    test("check the bootcamps manger CRUD to the db", () => {
+    test("check the bootcamps manger CRUD to the db", async () => {
         const res = {
             status: function(status){
             if(status == 200 || status == 201) return this;
@@ -79,7 +93,7 @@ describe("test the bootcamp Busines logic modle", () => {
         }, id)).toBeTruthy();
     });
 
-    test("find all bootcamps on earth using within radios", () => {
+    test("find all bootcamps on earth using within radios", async () => {
         db.getBootcampAmount();
 
         const res = {
@@ -99,12 +113,12 @@ describe("test the bootcamp Busines logic modle", () => {
             params:
             {
                 zipcode: "02215-1405",
-                distance: 6371
+                distance: Math.pow(6371, 2)
             }
  
         };
 
-        return bootcampManger.getBootcampWithinRadius(req, res, null);
+        return await bootcampManger.getBootcampWithinRadius(req, res, null);
     });
 
     
@@ -155,7 +169,7 @@ describe("test the course Busines logic modle", () => {
         return courseManger.getAllCourses({}, res, null);
     });
 
-    test("check that the courses controler can Delete create and get single course in db", async () => {
+    test("check that the courses controler can Delete create and get single course in db", (done) => {
         const id = "5d725a1b7b292f5f8ceff782";
         const req = { 
             body: 
@@ -189,14 +203,18 @@ describe("test the course Busines logic modle", () => {
                 Object.keys(req.body).forEach(key => {
                     if(key !== "bootcamp")
                         expect(obj.data[key].toString()).toEqual(req.body[key].toString());
-                }) 
+                })
+                
             }
         }
 
 
         
+        courseCRUDcheck(req, res, id).then( work => {
+            expect(work).toBeTruthy();
+            done();
+        })
         
-        return expect( await courseCRUDcheck(req, res, id)).toBeTruthy();
     });
 
     async function courseCRUDcheck(req, res, id)
