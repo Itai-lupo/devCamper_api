@@ -1,5 +1,7 @@
 import asyncHandler  = require("../utils/async");
 import geocoder = require("../utils/Geocoder");
+import ErrorResponse = require("../utils/errorResponse");
+import path = require('path');
 
 export default class bootcampLogic
 {
@@ -127,6 +129,40 @@ export default class bootcampLogic
         const radiusAroundTheLoction = distance/EarthRadius;
         return radiusAroundTheLoction;
     }
+
+    uploadBootcampImage = asyncHandler(async (req, res, next) => {
+        const id = req.params.id;
+        const file = req.files.file;
+
+        const bootcamp = await this.db.getBootcamp(id);
+
+        if(!bootcamp)
+            return next(new ErrorResponse(`bootcamp not found with id of ${id}`, 400));
+
+        if(!file)
+            return next(new ErrorResponse("please upload file", 400));
+
+        if(!file.mimetype.startsWith("image/"))
+            return next(new ErrorResponse("please upload an image file", 400));
+        
+        if(file.size > parseInt(process.env.MAX_FILE_UPLOAD))
+            return next(
+                new ErrorResponse(
+                `please upload an image with size less then ${process.env.MAX_FILE_UPLOAD}`,
+                400));
+            
+        file.name = `photo_${id}${path.parse(file.name).ext}`;
+        
+        file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, 
+            async err => {
+                if(err) 
+                    return next(new ErrorResponse(`failed to upload image file`, 500));
+                
+                await this.db.updateBootcamp(id, { photo: file.name});
+
+                this.returnSuccessRespondToTheClient(res, 200, file.name);
+            })
+    })
 
 
     private returnSuccessRespondToTheClient(res, status, data)

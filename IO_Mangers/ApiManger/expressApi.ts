@@ -2,7 +2,7 @@ import IAPIManager from "./IAPIManager";
 import express = require("express");
 import { Server } from "http";
 
-
+import fileupload = require('express-fileupload');
 import logger from "./middleware/logger";
 import errorHandler from "./middleware/error";
 
@@ -35,12 +35,12 @@ export default class expressApi implements IAPIManager
     private initMiddleware(): void
     {
         this.app.use(express.json());
-
+        this.app.use(fileupload());
+        this.app.use(express.static('public'));
+        
         if(process.env.NODE_ENV === 'development') this.app.use(logger);
         
         this.app.use(errorHandler);
-        
-        
     }
 
     public addRoute(method:string, path: string, functionToCall: (req: any, res: any, next: any) => void )

@@ -64,8 +64,10 @@ function initIOInputRoutes()
     APIManger.addRoute('delete', '/api/v1/bootcamps/:id', bootcampsManger.deleteBootcamp);
 
     APIManger.addRoute('get', '/api/v1/bootcamps/radius/:zipcode/:distance', bootcampsManger.getBootcampWithinRadius);
+    APIManger.addRoute('put', '/api/v1/bootcamps/:id/photo', bootcampsManger.uploadBootcampImage);
 
     APIManger.addRoute('get', '/api/v1/bootcamps/:bootcampId/courses', coursesManger.getAllCourses);
+    
     
     APIManger.addRoute('get', '/api/v1/courses', coursesManger.getAllCourses);
     APIManger.addRoute('post', '/api/v1/courses', coursesManger.createCourse);

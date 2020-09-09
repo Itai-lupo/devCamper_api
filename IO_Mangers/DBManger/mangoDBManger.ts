@@ -35,7 +35,8 @@ export default class mangoDBManger implements IDBManager
     private addOnTheFindPromeseTheQuery(params: any, dbRequst: any) {
         if(Object.keys(params).length === 0) return dbRequst;
 
-        if (params.select == "" || params.select.includes("courses"))
+        if (params.select == "" || 
+            (params.select.includes("courses") && !params.select.includes("-courses")))
             dbRequst = dbRequst.populate("courses");
 
         dbRequst = dbRequst.select(params.select);
